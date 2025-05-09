@@ -514,7 +514,7 @@ class _TaskFormBottomSheetState extends State<TaskFormBottomSheet> {
                               const SizedBox(width: 8),
                               IconButton(
                                 icon: Icon(
-                                  Iconsax.question_circle,
+                                  Iconsax.message_question,
                                   color: theme.colorScheme.primary,
                                   size: 20,
                                 ),
@@ -594,7 +594,7 @@ class _TaskFormBottomSheetState extends State<TaskFormBottomSheet> {
                               ),
                               IconButton(
                                 icon: Icon(
-                                  Iconsax.question_circle,
+                                  Iconsax.message_question,
                                   color: theme.colorScheme.primary,
                                 ),
                                 onPressed: _showMarkdownHelp,
