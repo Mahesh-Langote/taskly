@@ -1,0 +1,47 @@
+name: task_organizaer
+description: "A new Flutter project."
+
+publish_to: 'none'  
+ 
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.3 <4.0.0'
+ 
+dependencies:
+  flutter:
+    sdk: flutter
+ 
+  cupertino_icons: ^1.0.2
+  google_fonts: ^6.1.0
+  provider: ^6.1.1
+  intl: ^0.19.0
+  flutter_slidable: ^3.0.1
+  shared_preferences: ^2.2.2
+  flutter_animate: ^4.5.0
+  uuid: ^4.2.2
+   
+  firebase_core: ^2.28.1
+  firebase_auth: ^4.17.9
+  cloud_firestore: ^4.15.9
+  firebase_storage: ^11.6.10
+  google_sign_in: ^6.2.1
+  iconsax: ^0.0.8
+  flutter_markdown: ^0.6.18
+  url_launcher: ^6.2.2
+  flutter_linkify: ^6.0.0
+  flutter_link_previewer: ^3.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+ 
+  flutter_lints: ^5.0.0
+ 
+flutter:
+ 
+  uses-material-design: true
+ 
+  assets:
+    - assets/images/
+   

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+
+  <!-- Primary Meta Tags -->
+  <title>Task Organizer - Manage Tasks Efficiently</title>
+  <meta name="description" content="Task Organizer helps you manage tasks, set priorities, track deadlines, and boost productivity with an intuitive interface.">
+  <meta name="keywords" content="task organizer, task management, productivity app, to-do list, time management, project management">
+  <meta name="author" content="Mahesh Langote">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://taskorganizer.com/">
+  <meta property="og:title" content="Task Organizer - Manage Tasks Efficiently">
+  <meta property="og:description" content="Task Organizer helps you manage tasks, set priorities, track deadlines, and boost productivity with an intuitive interface.">
+  <meta property="og:image" content="icons/logo.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://taskorganizer.com/">
+  <meta property="twitter:title" content="Task Organizer - Manage Tasks Efficiently">
+  <meta property="twitter:description" content="Task Organizer helps you manage tasks, set priorities, track deadlines, and boost productivity with an intuitive interface.">
+  <meta property="twitter:image" content="icons/logo.png">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Task Organizer">
+  <link rel="apple-touch-icon" href="icons/logo.png">
+
+  <!-- PWA support -->
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <!-- Preconnect to origins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- App loading styles -->
+  <style>
+    body {
+      background-color: #f5f5f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .loading-text {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #555;
+    }
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #121212;
+      }
+      .loading-text {
+        color: #e0e0e0;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- Loading indicator -->
+<div class="loading" id="loading">
+  <img src="icons/logo.png" alt="Task Organizer Logo" width="80">
+  <p class="loading-text">Loading Task Organizer...</p>
+</div>
+
+<!-- Flutter web initialization -->
+<script>
+  // Hide loading indicator when Flutter app is ready
+  window.addEventListener('flutter-first-frame', function() {
+    const loadingElement = document.querySelector('#loading');
+    if (loadingElement) {
+      loadingElement.remove();
+    }
+  });
+</script>
+<script src="flutter_bootstrap.js" async></script>
+
+<!-- Service worker registration for PWA -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('flutter_service_worker.js');
+    });
+  }
+</script>
+</body>
+</html>
