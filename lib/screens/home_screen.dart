@@ -11,6 +11,7 @@ import 'task_detail_screen.dart';
 import 'category_screen.dart';
 import 'analytics_screen.dart';
 import 'settings_screen.dart';
+import 'notes_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen>
   final List<Widget> _screens = [
     const HomeTab(),
     const CategoryScreen(),
+    const NotesScreen(),
     const AnalyticsScreen(),
     const SettingsScreen(),
   ];
@@ -62,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_selectedIndex],
@@ -90,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen>
       )
           : null,
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           boxShadow: [
@@ -103,12 +106,13 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         child: SafeArea(
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildNavItem(0, Iconsax.home, 'Home'),
-              _buildNavItem(1, Iconsax.category, 'Categories'),
-              _buildNavItem(2, Iconsax.chart, 'Analytics'),
-              _buildNavItem(3, Iconsax.setting, 'Settings'),
+              buildNavItem(0, Iconsax.home, 'Home'),
+              buildNavItem(1, Iconsax.category, 'Categories'),
+              buildNavItem(2, Iconsax.note, 'Notes'),
+              buildNavItem(3, Iconsax.chart, 'Analytics'),
+              buildNavItem(4, Iconsax.setting, 'Settings'),
             ],
           ),
         ),
@@ -122,52 +126,54 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildNavItem(int index, IconData icon, String label) {
+  Widget buildNavItem(int index, IconData icon, String label) {
     final isSelected = index == _selectedIndex;
     final theme = Theme.of(context);
 
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _selectedIndex = index;
-        });
-      },
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? theme.colorScheme.primaryContainer
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isSelected
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurfaceVariant,
-              size: 24,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? theme.colorScheme.primaryContainer
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
                 color: isSelected
                     ? theme.colorScheme.primary
                     : theme.colorScheme.onSurfaceVariant,
+                size: 22,
               ),
-            ),
-          ],
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurfaceVariant,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );
-  }
-}
+  }}
 
 // Home Tab - contains the task lists with tabs
 class HomeTab extends StatefulWidget {
@@ -267,11 +273,11 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
                         fontWeight: FontWeight.bold,
                       ),
                     ).animate().fadeIn(duration: 300.ms).slideX(
-                      begin: -0.1,
-                      end: 0,
-                      duration: 300.ms,
-                      curve: Curves.easeOutQuad,
-                    ),
+                          begin: -0.1,
+                          end: 0,
+                          duration: 300.ms,
+                          curve: Curves.easeOutQuad,
+                        ),
                     CircleAvatar(
                       backgroundColor: Theme.of(context)
                           .colorScheme
@@ -282,11 +288,11 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
                         color: Theme.of(context).colorScheme.primary,
                       ),
                     ).animate().fadeIn(duration: 300.ms).slideX(
-                      begin: 0.1,
-                      end: 0,
-                      duration: 300.ms,
-                      curve: Curves.easeOutQuad,
-                    ),
+                          begin: 0.1,
+                          end: 0,
+                          duration: 300.ms,
+                          curve: Curves.easeOutQuad,
+                        ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -297,12 +303,12 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
                     color: Colors.grey[600],
                   ),
                 ).animate().fadeIn(duration: 300.ms).slideX(
-                  begin: -0.1,
-                  end: 0,
-                  duration: 300.ms,
-                  curve: Curves.easeOutQuad,
-                  delay: 100.ms,
-                ),
+                      begin: -0.1,
+                      end: 0,
+                      duration: 300.ms,
+                      curve: Curves.easeOutQuad,
+                      delay: 100.ms,
+                    ),
               ],
             ),
           ),
@@ -329,7 +335,7 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
                 boxShadow: [
                   BoxShadow(
                     color:
-                    Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                        Theme.of(context).colorScheme.primary.withOpacity(0.3),
                     blurRadius: 8,
                     spreadRadius: 1,
                     offset: const Offset(0, 2),
@@ -353,18 +359,21 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
               padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
               labelPadding: EdgeInsets.zero, // Remove padding to save space
               tabs: [
-                _buildTabItem(Iconsax.calendar_search5, 'All', _tabController.index == 0),
-                _buildTabItem(Iconsax.calendar_tick, 'Today', _tabController.index == 1),
-                _buildTabItem(Iconsax.calendar, 'Upcoming', _tabController.index == 2),
+                _buildTabItem(
+                    Iconsax.calendar_search5, 'All', _tabController.index == 0),
+                _buildTabItem(
+                    Iconsax.calendar_tick, 'Today', _tabController.index == 1),
+                _buildTabItem(
+                    Iconsax.calendar, 'Upcoming', _tabController.index == 2),
               ],
             ),
           ).animate().fadeIn(duration: 300.ms).slideY(
-            begin: -0.1,
-            end: 0,
-            duration: 300.ms,
-            curve: Curves.easeOutQuad,
-            delay: 150.ms,
-          ),
+                begin: -0.1,
+                end: 0,
+                duration: 300.ms,
+                curve: Curves.easeOutQuad,
+                delay: 150.ms,
+              ),
 
           const SizedBox(height: 16),
 
@@ -434,11 +443,11 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
             size: 80,
             color: Colors.grey.withOpacity(0.5),
           ).animate().fadeIn(duration: 500.ms).scale(
-            begin: const Offset(0.5, 0.5),
-            end: const Offset(1.0, 1.0),
-            curve: Curves.elasticOut,
-            duration: 750.ms,
-          ),
+                begin: const Offset(0.5, 0.5),
+                end: const Offset(1.0, 1.0),
+                curve: Curves.elasticOut,
+                duration: 750.ms,
+              ),
           const SizedBox(height: 16),
           Text(
             message,

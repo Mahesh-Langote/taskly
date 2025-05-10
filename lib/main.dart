@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'providers/task_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/category_provider.dart';
+import 'providers/note_provider.dart';
 import 'services/auth_service.dart';
 import 'services/database_service.dart';
 import 'services/sync_manager.dart';
@@ -76,7 +77,6 @@ class MyApp extends StatelessWidget {
                 syncManager: syncManager,
               ),
         ),
-
         ChangeNotifierProxyProvider2<AuthService, SyncManager, TaskProvider>(
           create: (_) => TaskProvider(
             authService: authService,
@@ -85,6 +85,20 @@ class MyApp extends StatelessWidget {
           update: (_, authService, syncManager, previous) =>
               previous ??
               TaskProvider(
+                authService: authService,
+                syncManager: syncManager,
+              ),
+        ),
+
+        // Note provider
+        ChangeNotifierProxyProvider2<AuthService, SyncManager, NoteProvider>(
+          create: (_) => NoteProvider(
+            authService: authService,
+            syncManager: syncManager,
+          ),
+          update: (_, authService, syncManager, previous) =>
+              previous ??
+              NoteProvider(
                 authService: authService,
                 syncManager: syncManager,
               ),

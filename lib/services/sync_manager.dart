@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:task_organizaer/models/task.dart';
 import 'package:task_organizaer/models/category.dart';
+import 'package:task_organizaer/models/note.dart'; // Add Note import
 import 'package:task_organizaer/services/auth_service.dart';
 import 'package:task_organizaer/services/database_service.dart';
 
@@ -187,6 +188,87 @@ class SyncManager {
       await _databaseService.deleteCategory(userId, categoryName);
     } catch (e) {
       debugPrint('Error deleting category from cloud: $e');
+    }
+  }
+
+  // Sync a single note to the cloud
+  Future<void> syncNoteToCloud(Note note) async {
+    final userId = _authService.getUserId();
+    if (userId == null || await _authService.isOfflineModeEnabled()) {
+      return;
+    }
+
+    try {
+      await _databaseService.saveNote(userId, note);
+    } catch (e) {
+      debugPrint('Error syncing note to cloud: $e');
+    }
+  }
+
+  // Sync all notes to the cloud
+  Future<void> syncNotesToCloud(List<Note> notes) async {
+    final userId = _authService.getUserId();
+    if (userId == null || await _authService.isOfflineModeEnabled()) {
+      return;
+    }
+
+    try {
+      _isSyncing = true;
+      _syncStatusController.add(true);
+
+      // Check if this is the first sync
+      bool isFirstSync = await _databaseService.isFirstSync(userId);
+
+      if (isFirstSync) {
+        // Initial sync: upload all notes in batch
+        await _databaseService.batchUploadNotes(userId, notes);
+      } else {
+        // Regular sync: handle individual notes
+        for (final note in notes) {
+          await _databaseService.saveNote(userId, note);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error syncing notes to cloud: $e');
+    } finally {
+      _isSyncing = false;
+      _syncStatusController.add(false);
+    }
+  }
+
+  // Fetch notes from the cloud
+  Future<List<Note>> fetchNotesFromCloud() async {
+    final userId = _authService.getUserId();
+    if (userId == null || await _authService.isOfflineModeEnabled()) {
+      return [];
+    }
+
+    try {
+      _isSyncing = true;
+      _syncStatusController.add(true);
+
+      final notes = await _databaseService.getNotes(userId);
+      return notes;
+    } catch (e) {
+      debugPrint('Error fetching notes from cloud: $e');
+      return [];
+    } finally {
+      _isSyncing = false;
+      _syncStatusController.add(false);
+    }
+  }
+
+  // Delete note from cloud
+  Future<void> deleteNoteFromCloud(String noteId) async {
+    final userId = _authService.getUserId();
+    if (userId == null || await _authService.isOfflineModeEnabled()) {
+      return;
+    }
+
+    try {
+      await _databaseService.deleteNote(userId, noteId);
+    } catch (e) {
+      debugPrint('Error deleting note from cloud: $e');
     }
   }
 }

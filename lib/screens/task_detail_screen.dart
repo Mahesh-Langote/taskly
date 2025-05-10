@@ -3,12 +3,13 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
+
 import 'package:flutter_link_previewer/flutter_link_previewer.dart';
 import '../models/task.dart';
 import '../providers/task_provider.dart';
 import '../utils/date_utils.dart';
 import '../widgets/task_form_bottom_sheet.dart';
+import '../widgets/notes_section.dart';
 
 class TaskDetailScreen extends StatelessWidget {
   final Task task;
@@ -26,7 +27,8 @@ class TaskDetailScreen extends StatelessWidget {
       r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)',
       caseSensitive: false,
     );
-    final urls = urlRegExp.allMatches(task.description)
+    final urls = urlRegExp
+        .allMatches(task.description)
         .map((match) => match.group(0))
         .where((url) => url != null)
         .map((url) => url!)
@@ -36,68 +38,69 @@ class TaskDetailScreen extends StatelessWidget {
       backgroundColor: isDarkMode
           ? Color.lerp(theme.colorScheme.background, Colors.black, 0.3)
           : Color.lerp(theme.colorScheme.background, Colors.white, 0.5),
-        appBar: AppBar(
-          elevation: 0,
-          centerTitle: true,
-          backgroundColor: Colors.transparent,
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Theme.of(context).primaryColor.withOpacity(0.8),
-                  Theme.of(context).primaryColor.withOpacity(0.6),
-                ],
-              ),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20),
-              ),
+      appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor.withOpacity(0.6),
+              ],
+            ),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
             ),
           ),
-          leadingWidth: 56,
-          leading: IconButton(
+        ),
+        leadingWidth: 56,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_rounded,
+            color: Colors.white,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          task.title,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+            fontSize: 18,
+          ),
+        ),
+        actions: [
+          IconButton(
             icon: const Icon(
-              Icons.arrow_back_ios_rounded,
+              Icons.edit_rounded,
               color: Colors.white,
             ),
-            onPressed: () => Navigator.pop(context),
+            tooltip: 'Edit Task',
+            onPressed: () {
+              _showEditTaskBottomSheet(context, task);
+            },
           ),
-          title: Text(
-            task.title,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-              fontSize: 18,
-            ),
-          ),
-          actions: [
-            IconButton(
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            child: IconButton(
               icon: const Icon(
-                Icons.edit_rounded,
-                color: Colors.white,
+                Icons.delete_rounded,
+                color: Colors.white70,
               ),
-              tooltip: 'Edit Task',
+              tooltip: 'Delete Task',
               onPressed: () {
-                _showEditTaskBottomSheet(context, task);
+                _showDeleteConfirmationDialog(context, taskProvider);
               },
             ),
-            Container(
-              margin: const EdgeInsets.only(right: 8),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.delete_rounded,
-                  color: Colors.white70,
-                ),
-                tooltip: 'Delete Task',
-                onPressed: () {
-                  _showDeleteConfirmationDialog(context, taskProvider);
-                },
-              ),
-            ),
-          ],
-        ),body: SingleChildScrollView(
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,7 +137,8 @@ class TaskDetailScreen extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(16),
@@ -166,11 +170,11 @@ class TaskDetailScreen extends StatelessWidget {
                       _buildPriorityBadge(task.priority),
                     ],
                   ).animate().fadeIn(duration: 300.ms).slideY(
-                    begin: -0.2,
-                    end: 0,
-                    duration: 300.ms,
-                    curve: Curves.easeOutQuad,
-                  ),
+                        begin: -0.2,
+                        end: 0,
+                        duration: 300.ms,
+                        curve: Curves.easeOutQuad,
+                      ),
 
                   const SizedBox(height: 20),
 
@@ -190,12 +194,12 @@ class TaskDetailScreen extends StatelessWidget {
                       ],
                     ),
                   ).animate().fadeIn(duration: 300.ms).slideX(
-                    begin: -0.1,
-                    end: 0,
-                    duration: 300.ms,
-                    curve: Curves.easeOutQuad,
-                    delay: 100.ms,
-                  ),
+                        begin: -0.1,
+                        end: 0,
+                        duration: 300.ms,
+                        curve: Curves.easeOutQuad,
+                        delay: 100.ms,
+                      ),
                 ],
               ),
             ),
@@ -239,7 +243,9 @@ class TaskDetailScreen extends StatelessWidget {
                   // Status Card
                   _buildInfoCard(
                     context,
-                    icon: task.isCompleted ? Icons.check_circle : Icons.pending_actions,
+                    icon: task.isCompleted
+                        ? Icons.check_circle
+                        : Icons.pending_actions,
                     title: 'Status',
                     value: task.isCompleted ? 'Completed' : 'Pending',
                     iconColor: task.isCompleted ? Colors.green : Colors.orange,
@@ -268,12 +274,12 @@ class TaskDetailScreen extends StatelessWidget {
                       ),
                     ],
                   ).animate().fadeIn(duration: 300.ms).slideX(
-                    begin: -0.1,
-                    end: 0,
-                    duration: 300.ms,
-                    curve: Curves.easeOutQuad,
-                    delay: 300.ms,
-                  ),
+                        begin: -0.1,
+                        end: 0,
+                        duration: 300.ms,
+                        curve: Curves.easeOutQuad,
+                        delay: 300.ms,
+                      ),
 
                   const SizedBox(height: 16),
 
@@ -300,134 +306,159 @@ class TaskDetailScreen extends StatelessWidget {
                     ),
                     child: task.description.isNotEmpty
                         ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Markdown content
-                        MarkdownBody(
-                          data: task.description,
-                          styleSheet: MarkdownStyleSheet(
-                            p: TextStyle(
-                              fontSize: 16,
-                              color: isDarkMode ? Colors.white : Colors.black87,
-                              height: 1.5,
-                            ),
-                            h1: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode ? Colors.white : Colors.black,
-                            ),
-                            h2: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode ? Colors.white : Colors.black,
-                            ),
-                            h3: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode ? Colors.white : Colors.black,
-                            ),
-                            code: TextStyle(
-                              backgroundColor: isDarkMode ? Colors.black26 : const Color(0xFFF3F3F3),
-                              fontFamily: 'monospace',
-                              color: isDarkMode ? Colors.amber : Colors.deepPurple,
-                            ),
-                            blockquote: TextStyle(
-                              color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
-                              fontStyle: FontStyle.italic,
-                            ),
-                            listBullet: TextStyle(
-                              color: task.categoryColor,
-                            ),
-                          ),
-                          onTapLink: (text, href, title) {
-                            if (href != null) {
-                              _launchUrl(href);
-                            }
-                          },
-                        ),
-
-                        // URL previews (if any)
-                        if (urls.isNotEmpty) ...[
-                          const SizedBox(height: 20),
-                          const Divider(thickness: 1),
-                          const SizedBox(height: 16),
-                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(
-                                Icons.link_rounded,
-                                size: 18,
-                                color: task.categoryColor,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Linked Content',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: task.categoryColor,
+                              // Markdown content
+                              MarkdownBody(
+                                data: task.description,
+                                styleSheet: MarkdownStyleSheet(
+                                  p: TextStyle(
+                                    fontSize: 16,
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : Colors.black87,
+                                    height: 1.5,
+                                  ),
+                                  h1: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : Colors.black,
+                                  ),
+                                  h2: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : Colors.black,
+                                  ),
+                                  h3: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : Colors.black,
+                                  ),
+                                  code: TextStyle(
+                                    backgroundColor: isDarkMode
+                                        ? Colors.black26
+                                        : const Color(0xFFF3F3F3),
+                                    fontFamily: 'monospace',
+                                    color: isDarkMode
+                                        ? Colors.amber
+                                        : Colors.deepPurple,
+                                  ),
+                                  blockquote: TextStyle(
+                                    color: isDarkMode
+                                        ? Colors.grey.shade300
+                                        : Colors.grey.shade700,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                  listBullet: TextStyle(
+                                    color: task.categoryColor,
+                                  ),
                                 ),
+                                onTapLink: (text, href, title) {
+                                  if (href != null) {
+                                    _launchUrl(href);
+                                  }
+                                },
                               ),
+
+                              // URL previews (if any)
+                              if (urls.isNotEmpty) ...[
+                                const SizedBox(height: 20),
+                                const Divider(thickness: 1),
+                                const SizedBox(height: 16),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.link_rounded,
+                                      size: 18,
+                                      color: task.categoryColor,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Linked Content',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: task.categoryColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                ...urls.map((url) => Container(
+                                      margin: const EdgeInsets.only(bottom: 16),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: isDarkMode
+                                              ? Colors.grey.shade700
+                                              : Colors.grey.shade300,
+                                          width: 1,
+                                        ),
+                                      ),
+                                      clipBehavior: Clip.antiAlias,
+                                      child: LinkPreview(
+                                        enableAnimation: true,
+                                        onPreviewDataFetched: (data) {
+                                          // Optional callback when preview data is fetched
+                                        },
+                                        text: url,
+                                        previewData:
+                                            null, // Will be fetched automatically
+                                        onLinkPressed: (url) {
+                                          _launchUrl(url);
+                                        },
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                      ),
+                                    )),
+                              ]
                             ],
-                          ),
-                          const SizedBox(height: 16),
-                          ...urls.map((url) => Container(
-                            margin: const EdgeInsets.only(bottom: 16),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: isDarkMode
-                                    ? Colors.grey.shade700
-                                    : Colors.grey.shade300,
-                                width: 1,
-                              ),
-                            ),
-                            clipBehavior: Clip.antiAlias,
-                            child: LinkPreview(
-                              enableAnimation: true,
-                              onPreviewDataFetched: (data) {
-                                // Optional callback when preview data is fetched
-                              },
-                              text: url,
-                              previewData: null, // Will be fetched automatically
-                              onLinkPressed: (url) {
-                                _launchUrl(url);
-                              },
-                              width: MediaQuery.of(context).size.width,
-                            ),
-                          )),
-                        ]
-                      ],
-                    )
+                          )
                         : Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 24),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.description_outlined,
-                              size: 40,
-                              color: isDarkMode ? Colors.grey.shade600 : Colors.grey.shade400,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No description provided',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: isDarkMode ? Colors.grey.shade500 : Colors.grey.shade600,
-                                fontStyle: FontStyle.italic,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 24),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.description_outlined,
+                                    size: 40,
+                                    color: isDarkMode
+                                        ? Colors.grey.shade600
+                                        : Colors.grey.shade400,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'No description provided',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: isDarkMode
+                                          ? Colors.grey.shade500
+                                          : Colors.grey.shade600,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
+                          ),
                   ).animate().fadeIn(duration: 300.ms).slideY(
-                    begin: 0.1,
-                    end: 0,
-                    duration: 300.ms,
-                    curve: Curves.easeOutQuad,
-                    delay: 350.ms,
-                  ),
+                        begin: 0.1,
+                        end: 0,
+                        duration: 300.ms,
+                        curve: Curves.easeOutQuad,
+                        delay: 350.ms,
+                      ),
+
+                  const SizedBox(height: 36),
+
+                  // Notes Section
+                  NotesSection(taskId: task.id),
 
                   const SizedBox(height: 36),
 
@@ -441,7 +472,9 @@ class TaskDetailScreen extends StatelessWidget {
                             Navigator.of(context).pop();
                           },
                           icon: Icon(
-                            task.isCompleted ? Icons.replay : Icons.check_circle,
+                            task.isCompleted
+                                ? Icons.replay
+                                : Icons.check_circle,
                           ),
                           label: Text(
                             task.isCompleted
@@ -467,12 +500,12 @@ class TaskDetailScreen extends StatelessWidget {
                       ),
                     ],
                   ).animate().fadeIn(duration: 300.ms).slideY(
-                    begin: 0.2,
-                    end: 0,
-                    duration: 300.ms,
-                    curve: Curves.easeOutQuad,
-                    delay: 400.ms,
-                  ),
+                        begin: 0.2,
+                        end: 0,
+                        duration: 300.ms,
+                        curve: Curves.easeOutQuad,
+                        delay: 400.ms,
+                      ),
 
                   const SizedBox(height: 24),
                 ],
@@ -485,14 +518,14 @@ class TaskDetailScreen extends StatelessWidget {
   }
 
   Widget _buildInfoCard(
-      BuildContext context, {
-        required IconData icon,
-        required String title,
-        required String value,
-        required Color iconColor,
-        bool fullWidth = false,
-        required Duration delay,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String value,
+    required Color iconColor,
+    bool fullWidth = false,
+    required Duration delay,
+  }) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
 
@@ -535,7 +568,9 @@ class TaskDetailScreen extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontSize: 14,
-                    color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+                    color: isDarkMode
+                        ? Colors.grey.shade400
+                        : Colors.grey.shade600,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -553,12 +588,12 @@ class TaskDetailScreen extends StatelessWidget {
         ],
       ),
     ).animate().fadeIn(duration: 300.ms).slideX(
-      begin: -0.1,
-      end: 0,
-      duration: 300.ms,
-      curve: Curves.easeOutQuad,
-      delay: delay,
-    );
+          begin: -0.1,
+          end: 0,
+          duration: 300.ms,
+          curve: Curves.easeOutQuad,
+          delay: delay,
+        );
   }
 
   Future<void> _launchUrl(String url) async {
@@ -571,51 +606,52 @@ class TaskDetailScreen extends StatelessWidget {
   Widget _buildPriorityBadge(int priority) {
     String text = '';
     IconData icon;
-    Color color = Colors.grey;
+    Color badgeColor = Colors.grey;
 
     switch (priority) {
       case 1:
         text = 'Low';
         icon = Icons.keyboard_arrow_down;
-        color = Colors.green;
+        badgeColor = Colors.green;
         break;
       case 2:
         text = 'Medium';
         icon = Icons.remove;
-        color = Colors.orange;
+        badgeColor = Colors.orange;
         break;
       case 3:
         text = 'High';
         icon = Icons.keyboard_arrow_up;
-        color = Colors.red;
+        badgeColor = Colors.red;
         break;
       default:
         text = 'Medium';
         icon = Icons.remove;
-        color = Colors.orange;
+        badgeColor = Colors.orange;
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: badgeColor.withOpacity(0.2),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: badgeColor.withOpacity(0.5), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             icon,
-            color: Colors.white,
+            color: badgeColor,
             size: 16,
           ),
           const SizedBox(width: 4),
           Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: badgeColor,
             ),
           ),
         ],
@@ -673,7 +709,8 @@ class TaskDetailScreen extends StatelessWidget {
               child: Text(
                 'Cancel',
                 style: TextStyle(
-                  color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
+                  color:
+                      isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
                 ),
               ),
             ),

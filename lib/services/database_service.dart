@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:task_organizaer/models/task.dart';
 import 'package:task_organizaer/models/category.dart';
+import 'package:task_organizaer/models/note.dart'; // Add Note import
 
 class DatabaseService {
   // Make Firestore nullable and initialize it only when needed
@@ -26,6 +27,8 @@ class DatabaseService {
       _usersCollection?.doc(userId).collection('tasks');
   CollectionReference? _categoriesCollection(String userId) =>
       _usersCollection?.doc(userId).collection('categories');
+  CollectionReference? _notesCollection(String userId) =>
+      _usersCollection?.doc(userId).collection('notes'); // Add notes collection
 
   // Add or update a task in Firestore
   Future<void> saveTask(String userId, Task task) async {
@@ -165,6 +168,61 @@ class DatabaseService {
     }
   }
 
+  // Save a note to Firestore
+  Future<void> saveNote(String userId, Note note) async {
+    if (_isOfflineMode || _firestore == null) {
+      return;
+    }
+
+    try {
+      final collection = _notesCollection(userId);
+      if (collection != null) {
+        await collection.doc(note.id).set(note.toJson());
+      }
+    } catch (e) {
+      debugPrint('Error saving note: $e');
+      rethrow;
+    }
+  }
+
+  // Get all notes for a user
+  Future<List<Note>> getNotes(String userId) async {
+    if (_isOfflineMode || _firestore == null) {
+      return [];
+    }
+
+    try {
+      final collection = _notesCollection(userId);
+      if (collection != null) {
+        final snapshot = await collection.get();
+        return snapshot.docs
+            .map((doc) => Note.fromJson(doc.data() as Map<String, dynamic>))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Error getting notes: $e');
+      return [];
+    }
+  }
+
+  // Delete a note from Firestore
+  Future<void> deleteNote(String userId, String noteId) async {
+    if (_isOfflineMode || _firestore == null) {
+      return;
+    }
+
+    try {
+      final collection = _notesCollection(userId);
+      if (collection != null) {
+        await collection.doc(noteId).delete();
+      }
+    } catch (e) {
+      debugPrint('Error deleting note: $e');
+      rethrow;
+    }
+  }
+
   // Batch upload tasks for initial sync
   Future<void> batchUploadTasks(String userId, List<Task> tasks) async {
     if (_isOfflineMode || _firestore == null) {
@@ -213,6 +271,30 @@ class DatabaseService {
       }
     } catch (e) {
       debugPrint('Error batch uploading categories: $e');
+      rethrow;
+    }
+  }
+
+  // Batch upload notes for initial sync
+  Future<void> batchUploadNotes(String userId, List<Note> notes) async {
+    if (_isOfflineMode || _firestore == null) {
+      return;
+    }
+
+    try {
+      final batch = _firestore!.batch();
+      final collection = _notesCollection(userId);
+
+      if (collection != null) {
+        for (final note in notes) {
+          final docRef = collection.doc(note.id);
+          batch.set(docRef, note.toJson());
+        }
+
+        await batch.commit();
+      }
+    } catch (e) {
+      debugPrint('Error batch uploading notes: $e');
       rethrow;
     }
   }
