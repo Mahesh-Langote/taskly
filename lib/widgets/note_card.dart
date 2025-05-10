@@ -3,6 +3,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import '../models/note.dart';
 import '../providers/note_provider.dart';
 import '../screens/add_edit_note_screen.dart';
@@ -151,9 +153,7 @@ class NoteCard extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
-
-            // Content
+            ), // Content with enhanced markdown support
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: MarkdownBody(
@@ -164,12 +164,56 @@ class NoteCard extends StatelessWidget {
                     color: getTextColor(note.color),
                     height: 1.4,
                   ),
+                  h1: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: getTextColor(note.color),
+                  ),
+                  h2: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: getTextColor(note.color),
+                  ),
+                  h3: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: getTextColor(note.color),
+                  ),
+                  blockquote: TextStyle(
+                    fontSize: 14,
+                    color: getTextColor(note.color).withOpacity(0.7),
+                    fontStyle: FontStyle.italic,
+                  ),
+                  code: TextStyle(
+                    fontSize: 13,
+                    color: getTextColor(note.color),
+                    backgroundColor:
+                        isDarkMode ? Colors.black54 : Colors.grey[200],
+                    fontFamily: 'monospace',
+                  ),
+                  codeblockDecoration: BoxDecoration(
+                    color: isDarkMode ? Colors.black54 : Colors.grey[200],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  listBullet: TextStyle(
+                    fontSize: 14,
+                    color: getTextColor(note.color),
+                  ),
+                  a: TextStyle(
+                    color: theme.primaryColor,
+                    decoration: TextDecoration.underline,
+                  ),
                 ),
+                onTapLink: (text, href, title) {
+                  if (href != null) {
+                    final uri = Uri.parse(href);
+                    launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                },
                 shrinkWrap: true,
                 softLineBreak: true,
               ),
             ),
-
             // Footer with metadata
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

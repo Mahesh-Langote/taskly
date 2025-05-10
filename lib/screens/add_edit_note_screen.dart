@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/note.dart';
 import '../providers/note_provider.dart';
 import '../providers/category_provider.dart';
 import '../utils/app_theme.dart';
-import '../widgets/tag_input_chip.dart';
+import '../widgets/markdown_toolbar.dart';
+import '../widgets/markdown_help_dialog.dart';
 
 class AddEditNoteScreen extends StatefulWidget {
   final String taskId;
@@ -21,7 +24,8 @@ class AddEditNoteScreen extends StatefulWidget {
   State<AddEditNoteScreen> createState() => _AddEditNoteScreenState();
 }
 
-class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
+class _AddEditNoteScreenState extends State<AddEditNoteScreen>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _titleController;
   late TextEditingController _contentController;
@@ -35,6 +39,9 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
   List<String> _attachments = [];
   // This will be populated with task categories
   late List<String> _suggestedCategories;
+
+  // For tab controller to switch between edit and preview
+  late TabController _tabController;
 
   // Predefined colors for notes
   final List<Color> _colorOptions = [
@@ -55,6 +62,9 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Initialize tab controller
+    _tabController = TabController(length: 2, vsync: this);
 
     // Initialize with note data if editing
     final note = widget.note;
@@ -106,6 +116,7 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
     _locationController.dispose();
     _categoryController.dispose();
     _tagController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -380,25 +391,190 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
                     delay: 150.ms,
                   ),
 
-              const SizedBox(height: 16),
-
-              // Content Field
-              TextFormField(
-                controller: _contentController,
-                decoration: InputDecoration(
-                  labelText: 'Content',
-                  hintText: 'Enter note details',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 16), // Content Field with Markdown support
+              Column(
+                children: [
+                  // Tab bar for Edit/Preview
+                  Container(
+                    decoration: BoxDecoration(
+                      color: isDarkMode
+                          ? Colors.grey.shade800
+                          : Colors.grey.shade200,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                      ),
+                    ),
+                    child: TabBar(
+                      controller: _tabController,
+                      tabs: const [
+                        Tab(text: 'EDIT'),
+                        // Tab(text: 'PREVIEW'),
+                      ],
+                      labelColor: Theme.of(context).primaryColor,
+                      unselectedLabelColor:
+                          isDarkMode ? Colors.white70 : Colors.black54,
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      indicatorColor: Theme.of(context).primaryColor,
+                    ),
                   ),
-                  filled: true,
-                  fillColor: isDarkMode
-                      ? Colors.grey.shade800.withOpacity(0.5)
-                      : Colors.white,
-                  alignLabelWithHint: true,
-                ),
-                maxLines: 10,
-                textAlignVertical: TextAlignVertical.top,
+
+                  // Content area (Edit/Preview)
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: isDarkMode
+                            ? Colors.grey.shade600
+                            : Colors.grey.shade300,
+                      ),
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(12),
+                        bottomRight: Radius.circular(12),
+                      ),
+                    ),
+                    height: 300, // Fixed height for content area
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        // Edit Tab
+                        Column(
+                          children: [
+                            // Markdown Toolbar
+                            Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: MarkdownToolbar(
+                                controller: _contentController,
+                                onInsert:
+                                    (String _) {}, // Just for state update
+                              ),
+                            ),
+
+                            // Text editor
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12.0),
+                                child: TextField(
+                                  controller: _contentController,
+                                  decoration: const InputDecoration(
+                                    hintText:
+                                        'Type your note here. Supports Markdown formatting.',
+                                    border: InputBorder.none,
+                                  ),
+                                  maxLines: null,
+                                  keyboardType: TextInputType.multiline,
+                                  textAlignVertical: TextAlignVertical.top,
+                                  expands: true,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // Preview Tab
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Markdown(
+                            data: _contentController.text,
+                            styleSheet: MarkdownStyleSheet(
+                              p: TextStyle(
+                                fontSize: 14,
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black87,
+                                height: 1.4,
+                              ),
+                              h1: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black87,
+                              ),
+                              h2: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black87,
+                              ),
+                              h3: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black87,
+                              ),
+                              blockquote: TextStyle(
+                                fontSize: 14,
+                                color: isDarkMode
+                                    ? Colors.white70
+                                    : Colors.black54,
+                                fontStyle: FontStyle.italic,
+                              ),
+                              code: TextStyle(
+                                fontSize: 13,
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black87,
+                                backgroundColor: isDarkMode
+                                    ? Colors.black54
+                                    : Colors.grey[200],
+                                fontFamily: 'monospace',
+                              ),
+                              codeblockDecoration: BoxDecoration(
+                                color: isDarkMode
+                                    ? Colors.black54
+                                    : Colors.grey[200],
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onTapLink: (text, href, title) {
+                              if (href != null) {
+                                final uri = Uri.parse(href);
+                                launchUrl(uri,
+                                    mode: LaunchMode.externalApplication);
+                              }
+                            },
+                            shrinkWrap: true,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Helper text for markdown with help button
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0, left: 4.0),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.info_outline,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 4),
+
+                        TextButton.icon(
+                          icon: const Icon(Icons.help_outline, size: 14),
+                          label: Text(
+                            'Markdown Help',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: theme.primaryColor,
+                            ),
+                          ),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => const MarkdownHelpDialog(),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ).animate().fadeIn(duration: 300.ms).slideY(
                     begin: 0.1,
                     end: 0,
