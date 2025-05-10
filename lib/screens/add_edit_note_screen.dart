@@ -164,6 +164,33 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen>
         noteProvider.updateNote(updatedNote);
       }
 
+      // Manually trigger cloud sync
+      await noteProvider.syncWithCloud();
+
+      // Show a snackbar indicating sync status
+      if (!mounted) return;
+
+      final syncError = noteProvider.syncError;
+      if (syncError != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Note saved locally. Sync error: $syncError'),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(noteProvider.syncInProgress
+                ? 'Note saved. Syncing with cloud...'
+                : 'Note saved and synced with cloud'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+
       Navigator.of(context).pop();
     }
   }
@@ -409,7 +436,7 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen>
                       controller: _tabController,
                       tabs: const [
                         Tab(text: 'EDIT'),
-                        // Tab(text: 'PREVIEW'),
+                        Tab(text: 'PREVIEW'),
                       ],
                       labelColor: Theme.of(context).primaryColor,
                       unselectedLabelColor:
@@ -547,7 +574,6 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen>
                           size: 14,
                         ),
                         const SizedBox(width: 4),
-
                         TextButton.icon(
                           icon: const Icon(Icons.help_outline, size: 14),
                           label: Text(

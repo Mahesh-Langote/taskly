@@ -30,8 +30,7 @@ class NoteProvider extends ChangeNotifier {
       : _syncManager = syncManager,
         _authService = authService {
     _loadSettings();
-  }
-  // Get notes by task ID
+  } // Get notes by task ID
   List<Note> getNotesByTaskId(String taskId) {
     return _notes.where((note) => note.taskId == taskId).toList();
   }
@@ -41,6 +40,8 @@ class NoteProvider extends ChangeNotifier {
     return _notes.where((note) => note.taskId.isEmpty).toList();
   }
 
+
+
   // Get all task-related notes
   List<Note> getTaskNotes() {
     return _notes.where((note) => note.taskId.isNotEmpty).toList();
@@ -49,6 +50,15 @@ class NoteProvider extends ChangeNotifier {
   // Get notes by category
   List<Note> getNotesByCategory(String category) {
     return _notes.where((note) => note.category == category).toList();
+  }
+
+  // Get a note by its ID
+  Note? getNoteById(String id) {
+    try {
+      return _notes.firstWhere((note) => note.id == id);
+    } catch (e) {
+      return null;
+    }
   }
 
   // Get color for a specific category name
