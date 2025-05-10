@@ -28,7 +28,44 @@ A comprehensive task management application built with Flutter that works both o
 
 ## 📱 Screenshots
 
-*Coming Soon*
+### Task Management
+<p align="center">
+  <img src="screenshots/todo/todo_all.jpg" alt="All Tasks" width="250"/>
+  <img src="screenshots/todo/today_todo.jpg" alt="Today's Tasks" width="250"/>
+  <img src="screenshots/todo/todo_upcoming.jpg" alt="Upcoming Tasks" width="250"/>
+</p>
+
+<p align="center">
+  <img src="screenshots/todo/create_todo.jpg" alt="Create Task" width="250"/>
+  <img src="screenshots/todo/edite_todo.jpg" alt="Edit Task" width="250"/>
+</p>
+
+<p align="center">
+  <img src="screenshots/todo/view_details.jpg" alt="Task Details" width="250"/>
+  <img src="screenshots/todo/view_detail2.jpg" alt="Extended Task Details" width="250"/>
+</p>
+
+### Categories
+<p align="center">
+  <img src="screenshots/category/view_category.jpg" alt="View Categories" width="250"/>
+  <img src="screenshots/category/create-category.jpg" alt="Create Category" width="250"/>
+</p>
+
+### Notes
+<p align="center">
+  <img src="screenshots/note/note_todo.jpg" alt="Task Notes" width="250"/>
+  <img src="screenshots/note/individual_note.jpg" alt="Individual Note" width="250"/>
+</p>
+
+### Analytics
+<p align="center">
+  <img src="screenshots/analytics/analytics.jpg" alt="Task Analytics" width="250"/>
+</p>
+
+### Settings
+<p align="center">
+  <img src="screenshots/settings/settings.jpg" alt="App Settings" width="250"/>
+</p>
 
 ## 🚀 Getting Started
 
