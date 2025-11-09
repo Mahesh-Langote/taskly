@@ -1,0 +1,13 @@
+name: Security Scan
+
+on: [push, pull_request]
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: Mahesh-Langote/securegate@v1
+        with:
+          github-token: ${{ secrets.TOKEN }}
